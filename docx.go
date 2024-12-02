@@ -13,15 +13,15 @@ import (
 )
 
 const (
-	versionCollection      = "docx_version"
-	idIndexName            = "_id_"
-	historyMetaIdIndexName = "idx_meta_id"
+	versionCollection = "docx_version"
+	idIndexName       = "_id_"
+	createAtIndexName = "idx_meta_createAt"
 )
 
 var (
 	builtinIndexes = []Index{
 		{
-			Name:       "idx_meta_createAt",
+			Name:       createAtIndexName,
 			Attributes: []string{MetaKey + "." + CreateAtKey},
 			Unique:     false,
 		},
@@ -99,7 +99,9 @@ func (docx *Docx) Bind(ctx context.Context, m any) error {
 	// Add the indexes that are not in the database but in the scheme.Indexes
 	// into variable indexModels.
 	for name, index := range indexes {
-		name, index := name, index
+		if index.Name != "" {
+			name = index.Name
+		}
 		if _, ok := oldIndexNameSet[name]; ok {
 			continue
 		}
