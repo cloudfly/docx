@@ -28,10 +28,13 @@ type Request struct {
 	secret     string // secret 用于 lock，unlock，update
 	page       int64  // 分页, 用于 find
 	pageSize   int64  // 分页，一页大小 用于 find
-	quiet      bool   // 是否是 quiet 更新
 	tag        string // 用于标签管理
 	data       any    // 资源数据，用于 update 和 add
 	dest       any    // dest 作为 decode response 的目标
+}
+
+func NewRequest(dst any) *Request {
+	return Default.Request(dst)
 }
 
 // Reset 重置所有设定
@@ -154,15 +157,6 @@ func (r *Request) Add(data any) *Request {
 func (r *Request) Update(id string, data any) *Request {
 	r.action = "update"
 	r.data = data
-	r.id = id
-	return r
-}
-
-// QuietUpdate 使用 Id 更新一个资源对象，并让本次更新不会触发 History 记录，不会被 Watch 感知。
-func (r *Request) QuietUpdate(id string, data any) *Request {
-	r.action = "update"
-	r.data = data
-	r.quiet = true
 	r.id = id
 	return r
 }

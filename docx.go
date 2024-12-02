@@ -12,10 +12,40 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
+const (
+	versionCollection      = "docx_version"
+	idIndexName            = "_id_"
+	historyMetaIdIndexName = "idx_meta_id"
+)
+
+var (
+	builtinIndexes = []Index{
+		{
+			Name:       "idx_meta_createAt",
+			Attributes: []string{MetaKey + "." + CreateAtKey},
+			Unique:     false,
+		},
+	}
+
+	Default *Docx
+)
+
+func Init(client *mongo.Client, database string) {
+	Default = New(client, database)
+}
+
 type Docx struct {
 	client *mongo.Client
 
 	database string
+}
+
+func New(client *mongo.Client, database string) *Docx {
+	x := Docx{
+		client:   client,
+		database: database,
+	}
+	return &x
 }
 
 // RegisterScheme will register a scheme into MongoDB by its Name (If there is
@@ -122,7 +152,8 @@ func (docx *Docx) Bind(ctx context.Context, m any) error {
 }
 
 // Unregister will drop the scheme.
-func (docx *Docx) Unbind(ctx context.Context, name string) error {
+func (docx *Docx) Unbind(ctx context.Context, m any) error {
+	name := collectionFromModel(m)
 	log.Ctx(ctx).Info().Str("collection", name).Msg("Drop collection")
 	if err := docx.collection(name).Drop(ctx); err != nil {
 		return Error(err)
@@ -174,4 +205,12 @@ func collectionFromModel(d any) string {
 	}
 
 	return strings.ToLower(t.Name())
+}
+
+func Bind(ctx context.Context, m any) error {
+	return Default.Bind(ctx, m)
+}
+
+func Unbind(ctx context.Context, m any) error {
+	return Default.Unbind(ctx, m)
 }

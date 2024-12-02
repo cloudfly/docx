@@ -1,7 +1,6 @@
 package docx
 
 import (
-	"reflect"
 	"time"
 )
 
@@ -47,8 +46,4 @@ type Index struct {
 	Name       string   `json:"name"`
 	Attributes []string `json:"attributes"`
 	Unique     bool     `json:"unique"`
-}
-
-func (index Index) Equal(index2 Index) bool {
-	return reflect.DeepEqual(index, index2)
 }
